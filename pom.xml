@@ -8,12 +8,22 @@
   <name>XMLConvert1</name>
   <url>http://maven.apache.org</url>
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
+      <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>Saxon-HE</artifactId>
+          <version>9.7.0-4</version>
+      </dependency>
+      <dependency>
+          <groupId>net.sf.saxon</groupId>
+          <artifactId>saxon-jdom</artifactId>
+          <version>8.7</version>
+      </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>3.8.1</version>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
 
   <build>

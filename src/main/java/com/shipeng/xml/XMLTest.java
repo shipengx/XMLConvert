@@ -1,12 +1,27 @@
 package com.shipeng.xml;
 
+import net.sf.saxon.s9api.*;
+import org.w3c.dom.Document;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.XMLFilterImpl;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.ErrorListener;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import java.io.*;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.util.*;
+
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -26,35 +41,40 @@ public class XMLTest {
         String inputXSL = args[1];
         String output   = args[2];
 
+        System.out.println("dataXML is: " + dataXML);
+        System.out.println("inputXSL is: " + inputXSL);
+        System.out.println("output is: " + output);
+
+
         XMLTest st = new XMLTest();
         try {
             st.transform(dataXML, inputXSL, output);
-        }catch (TransformerConfigurationException e) {
-            System.err.println("TransformerConfigurationException");
-            System.err.println(e);
-        }catch (TransformerException e) {
-            System.err.println("TransformerException");
-            System.err.println(e);
+        }catch (SaxonApiException e) {
+            e.printStackTrace();
         }
     
     }//end main
 
 
-    public void transform(String dataXML, String inputXSL, String outputXML)throws TransformerConfigurationException, TransformerException {
-        
-        TransformerFactory factory = TransformerFactory.newInstance();
-        StreamSource    xslStream  = new StreamSource(inputXSL);
-        Transformer transformer    = factory.newTransformer(xslStream);
-        StreamSource in            = new StreamSource(dataXML);
-        StreamResult out           = new StreamResult(outputXML);
-        transformer.transform(in, out);
-        System.out.println("the generated XML file is: " + outputXML);
+    public void transform(String dataXML, String inputXSL, String output)throws SaxonApiException {
+        Processor proc     = new Processor(false);
+        XsltCompiler comp  = proc.newXsltCompiler();
+        XsltExecutable exp = comp.compile(new StreamSource(new File(inputXSL)));
+        XdmNode source     = proc.newDocumentBuilder().build(new StreamSource(new File(dataXML)));
+        Serializer out     = proc.newSerializer(new File(output));
+        out.setOutputProperty(Serializer.Property.METHOD, "text");
+        out.setOutputProperty(Serializer.Property.INDENT, "yes");
+        XsltTransformer trans = exp.load();
+        trans.setInitialContextNode(source);
+        trans.setDestination(out);
+        trans.transform();
+
+        System.out.println("output written to " + output);
 
     }//end transform
 
 
     public static final String readFile(String filePath) {
-        
         String result     = "";
         BufferedReader br = null;
         try {
@@ -78,7 +98,6 @@ public class XMLTest {
         }
         return result;
     }//end readFile
-
 
 
 }//end class XMLTest
